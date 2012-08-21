@@ -145,5 +145,41 @@ namespace PercolationTests
             // assert
             Assert.IsFalse(percolation.Connected(5, 6));
         }
+
+        [Test]
+        public void Given_path_from_up_to_down_percolates_should_return_true()
+        {
+            // arrange
+            var percolation = new Percolation(5);
+            percolation.Open(2,3);
+            percolation.Open(3,3);
+            percolation.Open(4,3);
+            percolation.Open(5,3);
+            percolation.Open(1,3);
+
+            // act
+            var actual = percolation.Percolates();
+
+            // assert
+            Assert.IsTrue(actual);
+        }
+
+        [Test]
+        public void Open_cells_without_path_from_up_to_down_should_return_false()
+        {
+            // arrange
+            var percolation = new Percolation(5);
+            percolation.Open(2, 2);
+            percolation.Open(3, 3);
+            percolation.Open(4, 4);
+            percolation.Open(5, 5);
+            percolation.Open(1, 1);
+
+            // act
+            var actual = percolation.Percolates();
+
+            // assert
+            Assert.IsFalse(actual);
+        }
     }
 }

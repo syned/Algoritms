@@ -10,11 +10,14 @@ namespace PercolationProgram
         private readonly QuickFind _quickFind;
 
         private readonly int _n;
+        private readonly int _rootBelow;
+        private readonly int _rootAbove = 0;
 
         public Percolation(int n)
         {
             _n = n;
-            var doubleSize = _n*_n + 2;
+            _rootBelow = _n*_n + 1;           
+            var doubleSize = _rootBelow + 1;
             _opens = new bool[doubleSize];
             _opens[0] = _opens[doubleSize - 1] = true;
             _quickFind = new QuickFind(doubleSize);
@@ -61,7 +64,7 @@ namespace PercolationProgram
         private void ConnectWithCellBelow(int cell)
         {
             var below = cell + _n;
-            below = below <= _n*_n ? below : _n*_n + 1;
+            below = below < _rootBelow ? below : _rootBelow;
 
             if (_opens[below])
                 _quickFind.Union(cell, below);
@@ -70,7 +73,7 @@ namespace PercolationProgram
         private void ConnectWithCellAbove(int cell)
         {
             var above = cell - _n;
-            var aboveCell = above > 0 ? above : 0;
+            var aboveCell = above > _rootAbove ? above : _rootAbove;
 
             if (_opens[aboveCell])
                 _quickFind.Union(cell, aboveCell);
@@ -86,15 +89,16 @@ namespace PercolationProgram
             var cell = GetCell(i, j);
             return _opens[cell];
         }
-   
+
         public bool IsFull(int i, int j)
         {
-            throw new NotImplementedException();
+            var cell = GetCell(i, j);
+            return _opens[cell] && _quickFind.Connected(cell, _rootBelow);
         }
 
         public bool Percolates()
         {
-            throw new NotImplementedException();
+            return _quickFind.Connected(_rootAbove, _rootBelow);
         }
 
         public override string ToString()
