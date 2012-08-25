@@ -5,15 +5,18 @@ public class PercolationStats {
     
     private double[] means;
     
-    public PercolationStats(int N, int T){
+    public PercolationStats(int N, int T) {
+        
+        if (N < 1 || T < 1)
+            throw new IllegalArgumentException("Invalid input data");
         
         means = new double[T];
         
-        for(int k = 0;k < T;k++){
+        for (int k = 0; k < T; k++) {
             percolation = new Percolation(N);
             
             int countOpened = 0;
-            do{
+            do {
                 int i = StdRandom.uniform(1, N + 1);
                 int j = StdRandom.uniform(1, N + 1);
                 
@@ -22,9 +25,9 @@ public class PercolationStats {
                 percolation.open(i, j);
                 
                 countOpened++;
-            }while(!percolation.percolates());
+            } while(!percolation.percolates());
             
-            means[k] = (double)countOpened/(N*N);
+            means[k] = (double) countOpened/(N*N);
         }
     }
     
@@ -45,9 +48,6 @@ public class PercolationStats {
         
         int N = Integer.parseInt(args[0]);
         int T = Integer.parseInt(args[1]);
-        
-        if (N < 1 || T <= 1)
-            throw new IllegalArgumentException();
         
         PercolationStats percolationStats = new PercolationStats(N, T);
         
