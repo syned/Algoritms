@@ -44,6 +44,8 @@ namespace PercolationProgram
             return _mean;
         }
 
+
+
         static void Main(string[] args)
         {
             var N = Int32.Parse(args[0]);

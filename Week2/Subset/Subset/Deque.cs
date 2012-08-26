@@ -4,8 +4,13 @@ using System.Collections.Generic;
 
 namespace Subset
 {
-    public class Deque<T> : IEnumerable<T>, IEnumerator<T>
+    public class Deque<T> : IEnumerable<T> where T : class
     {
+        private QueueItem _firstItem;
+        private QueueItem _lastItem;
+
+        private int _size;
+
         public Deque()
         {
             
@@ -13,114 +18,102 @@ namespace Subset
 
         public bool IsEmpty()
         {
-            throw new NotImplementedException();
+            return _size == 0;
         }
 
         public int Size()
         {
-            throw new NotImplementedException();
+            return _size;
         }
 
         public void AddFirst(T item)
         {
-            
+            CheckIfItemIsNull(item);
+
+            var tmpItem = _firstItem;
+
+            _firstItem = new QueueItem
+                             {
+                                 Value = item,
+                                 Next = tmpItem
+                             };
+
+            if (IsEmpty())
+                _lastItem = _firstItem;
+
+            _size++;
+        }
+
+        private static void CheckIfItemIsNull(T item)
+        {
+            if (item == null)
+                throw new NullReferenceException();
         }
 
         public void AddLast(T item)
         {
-            
+            CheckIfItemIsNull(item);
+
+            var tmpItem = _lastItem;
+
+            _lastItem = new QueueItem
+                            {
+                                Value = item,
+                                Prev = tmpItem
+                            };
+
+            if (!IsEmpty())
+                tmpItem.Next = _lastItem;
+            else
+                _firstItem = _lastItem;
+
+            _size++;
         }
 
         public T RemoveFirst()
         {
-            throw new NotImplementedException();
+            if (IsEmpty())
+                throw new NoSuchElementException();
+
+            var tmpItem = _firstItem;
+
+            _firstItem = _firstItem.Next;
+
+            _size--;
+
+            return tmpItem.Value;
         }
 
         public T RemoveLast()
         {
-            throw new NotImplementedException();
+            if (IsEmpty())
+                throw new NoSuchElementException();
+
+            var tmpItem = _lastItem;
+
+            _lastItem = _lastItem.Prev;
+
+            _size--;
+
+            return tmpItem.Value;
+        }
+
+        private class QueueItem
+        {
+            public T Value { get; set; }            
+            public QueueItem Next { get; set; }            
         }
 
         #region IEnumerable
 
         public IEnumerator<T> GetEnumerator()
         {
-            throw new NotImplementedException();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
-
-        #endregion
-
-        #region IEnumerator
-        public void Dispose()
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool MoveNext()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Reset()
-        {
-            throw new NotImplementedException();
-        }
-
-        public T Current
-        {
-            get { throw new NotImplementedException(); }
-        }
-
-        object IEnumerator.Current
-        {
-            get { return Current; }
-        }
-
-        #endregion
-    }
-
-    public class RandomizedQueue<T> : IEnumerable<T>
-    {
-
-        public RandomizedQueue()
-        {
-            
-        }
-
-        public bool IsEmpty()
-        {
-            throw new NotImplementedException();
-        }
-
-        public int Size()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Enqueue(T item)
-        {
-            
-        }
-
-        public T Dequeue()
-        {
-            throw new NotImplementedException();
-        }
-
-        public T Sample()
-        {
-            throw new NotImplementedException();
-        }
-
-        #region IEnumerable
-        public IEnumerator<T> GetEnumerator()
-        {
-            throw new NotImplementedException();
+            QueueItem iterator = _firstItem;
+            while (iterator != null)
+            {
+                yield return iterator.Value;
+                iterator = iterator.Next;
+            }
         }
 
         IEnumerator IEnumerable.GetEnumerator()
