@@ -1,4 +1,3 @@
-import java.security.NoSuchAlgorithmException;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
@@ -8,6 +7,11 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
     private Item[] queue;
     private int size;
     private int capacity;
+    
+    public RandomizedQueue() {
+        capacity = 2;
+        resizeQueue();
+    }
     
     private void resizeQueue() {
         Item[] tmp = (Item[]) new Object[capacity];
@@ -22,11 +26,6 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
     private void checkIfQueueIsEmpty() {
         if (size() == 0)
             throw new NoSuchElementException();
-    }
-    
-    public RandomizedQueue() {
-        capacity = 2;
-        resizeQueue();
     }
     
     public boolean isEmpty() {

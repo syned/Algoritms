@@ -4,10 +4,16 @@ import java.util.NoSuchElementException;
 
 public class Deque<Item> implements Iterable<Item> {
 
+    public Deque() {
+        firstItem = null;
+        lastItem = null;
+        size = 0;
+    }
+    
     private class QueueItem {
-        Item item;
-        QueueItem next;
-        QueueItem prev;
+        private Item item;
+        private QueueItem next;
+        private QueueItem prev;
     }
     
     private QueueItem firstItem;
@@ -22,12 +28,6 @@ public class Deque<Item> implements Iterable<Item> {
     private void checkIfQueueIsEmpty() {
         if (isEmpty())
             throw new NoSuchElementException();
-    }
-    
-    public Deque() {
-        firstItem = null;
-        lastItem = null;
-        size = 0;
     }
     
     public boolean isEmpty() {
@@ -78,6 +78,10 @@ public class Deque<Item> implements Iterable<Item> {
         QueueItem tmp = firstItem;
         firstItem = firstItem.next;        
         size--;
+        if (size > 0)
+            firstItem.prev = null;
+        else
+            lastItem = null;
         return tmp.item;
     }
     
@@ -87,6 +91,10 @@ public class Deque<Item> implements Iterable<Item> {
         QueueItem tmp = lastItem;
         lastItem = lastItem.prev;        
         size--;
+        if (size > 0)
+            lastItem.next = null;
+        else
+            firstItem = null;
         return tmp.item;        
     }
     
