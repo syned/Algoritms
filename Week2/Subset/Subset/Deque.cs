@@ -58,12 +58,15 @@ namespace Subset
 
             _lastItem = new QueueItem
                             {
-                                Value = item,
-                                Prev = tmpItem
+                                Value = item,                                
                             };
 
+            
+            
             if (!IsEmpty())
+            {
                 tmpItem.Next = _lastItem;
+            }
             else
                 _firstItem = _lastItem;
 
