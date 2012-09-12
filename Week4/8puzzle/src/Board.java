@@ -9,7 +9,7 @@ import java.util.Iterator;
  * To change this template use File | Settings | File Templates.
  */
 public class Board {
-    private int[][] blocks;
+    private short[][] blocks;
     private int N;
     private int hamming;
     private int manhattan;
@@ -38,33 +38,25 @@ public class Board {
         return Math.abs(row - i) + Math.abs(col - j);
     }
 
-    private Comparator<Board> GetComparator() {
-        return new Comparator<Board>() {
-            @Override
-            public int compare(Board o1, Board o2) {
-                if (o1.manhattan() > o2.manhattan())
-                    return 1;
-                if (o1.manhattan() < o2.manhattan())
-                    return -1;
-                return 0;
-            }
-        };
-    }
+    private int[][] swap(int cellRow, int cellCol, int cellRow2, int cellCol2) {
+        int[][] swapped = new int[N][N];
+        for (int i = 0; i < N; i++)
+            for (int j = 0; j < N; j++)
+               swapped[i][j] = this.blocks[i][j];
+        int temp = swapped[cellRow][cellCol];
+        swapped[cellRow][cellCol] = swapped[cellRow2][cellCol2];
+        swapped[cellRow2][cellCol2] = temp;
 
-    private void swap(int cellRow, int cellCol, int cellRow2, int cellCol2) {
-        this.blocks[cellRow][cellCol] = this.blocks[cellRow2][cellCol2];
-        this.blocks[cellRow2][cellCol2] = 0;
+        return swapped;
     }
 
     public Board(int[][] blocks) {
         N = blocks.length;
-
-        queue = new Queue<Board>();
         
-        this.blocks = new int[N][N];        
+        this.blocks = new short[N][N];
         for (int i = 0; i < N; i++)
             for (int j = 0; j < N; j++) {
-                this.blocks[i][j] = blocks[i][j];                
+                this.blocks[i][j] = (short) blocks[i][j];
                 if (this.blocks[i][j] != rightPlace(i, j) && this.blocks[i][j] != 0) {
                     hamming++;
                     manhattan += getDistanceToGoalPosition(i, j);
@@ -95,7 +87,13 @@ public class Board {
     }
 
     public Board twin() {
-        return this;
+        short leftCol = 0;
+        short leftRow = 0;
+        if (blocks[leftRow][leftCol] == 0 || blocks[leftRow][leftCol+1] == 0) {
+            leftRow = 1;
+        }
+
+        return new Board(swap(leftRow, leftCol, leftRow, leftCol+1));
     }
 
     public boolean equals(Object y) {
@@ -104,6 +102,10 @@ public class Board {
         if (y.getClass() != this.getClass()) return false;
 
         Board that = (Board) y;
+
+        if (this.N != that.N)
+            return false;
+
         for (int i = 0; i < N; i++)
             for (int j = 0; j < N; j++)
                 if (this.blocks[i][j] != that.blocks[i][j])
@@ -113,28 +115,22 @@ public class Board {
     }
 
     public Iterable<Board> neighbors() {
+        queue = new Queue<Board>();
+
         if (emptyCellRow != 0) {
-            swap(emptyCellRow, emptyCellCol, emptyCellRow-1, emptyCellCol);
-            queue.enqueue(new Board(this.blocks));
-            swap(emptyCellRow - 1, emptyCellCol, emptyCellRow, emptyCellCol);
+            queue.enqueue(new Board(swap(emptyCellRow, emptyCellCol, emptyCellRow - 1, emptyCellCol)));
         }
 
         if (emptyCellRow != N-1) {
-            swap(emptyCellRow, emptyCellCol, emptyCellRow+1, emptyCellCol);
-            queue.enqueue(new Board(this.blocks));
-            swap(emptyCellRow + 1, emptyCellCol, emptyCellRow, emptyCellCol);
+            queue.enqueue(new Board(swap(emptyCellRow, emptyCellCol, emptyCellRow+1, emptyCellCol)));
         }
 
         if (emptyCellCol != 0) {
-            swap(emptyCellRow, emptyCellCol, emptyCellRow, emptyCellCol-1);
-            queue.enqueue(new Board(this.blocks));
-            swap(emptyCellRow, emptyCellCol-1, emptyCellRow, emptyCellCol);
+            queue.enqueue(new Board(swap(emptyCellRow, emptyCellCol, emptyCellRow, emptyCellCol-1)));
         }
 
         if (emptyCellCol != N-1) {
-            swap(emptyCellRow, emptyCellCol, emptyCellRow, emptyCellCol+1);
-            queue.enqueue(new Board(this.blocks));
-            swap(emptyCellRow, emptyCellCol+1, emptyCellRow, emptyCellCol);
+            queue.enqueue(new Board(swap(emptyCellRow, emptyCellCol, emptyCellRow, emptyCellCol+1)));
         }
 
         return queue;

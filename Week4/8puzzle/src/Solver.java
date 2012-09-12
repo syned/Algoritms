@@ -9,20 +9,30 @@ import java.util.Comparator;
  */
 public class Solver {
 
-    private boolean isSolvable;
-    private Queue<Board> solution;
-    private MinPQ<PriorityBoard> priorityQueue;
-    private int moves = 0;
+    private boolean isSolvable;    
+    private PriorityBoard lastNode;
 
     private Comparator<PriorityBoard> comparator;
 
     private class PriorityBoard {
         private Board board;
-        private int priority;
+        private int manhattan;
+        private int moves;
+        private PriorityBoard previous;
 
-        public PriorityBoard(Board board, int moves) {
+        public PriorityBoard(Board board, int moves, PriorityBoard previous) {
             this.board = board;
-            this.priority = moves + board.manhattan();
+            this.moves = moves;
+            this.manhattan = board.manhattan();
+            this.previous = previous;
+        }
+
+        public String toString() {
+            StringBuilder s = new StringBuilder();
+            s.append("manhattan="+manhattan);
+            s.append("\n");
+            s.append(board.toString());
+            return s.toString();
         }
     }
 
@@ -30,39 +40,47 @@ public class Solver {
         comparator = new Comparator<PriorityBoard>() {
             @Override
             public int compare(PriorityBoard o1, PriorityBoard o2) {
-                if (o1.priority < o2.priority)
+                int priority1 = o1.moves + o1.manhattan;
+                int priority2 = o2.moves + o2.manhattan;
+                if (priority1 < priority2)
                     return -1;
-                if (o1.priority > o2.priority)
+                if (priority1 > priority2)
                     return 1;
                 return 0;
             }
         };
 
-        priorityQueue = new MinPQ<PriorityBoard>(4, comparator);
-        solution = new Queue<Board>();
+        MinPQ<PriorityBoard> priorityQueue = new MinPQ<PriorityBoard>(4, comparator);
+        MinPQ<PriorityBoard> twinQueue = new MinPQ<PriorityBoard>(4, comparator);
 
-        Board current = initial;
-        Board previous = null;
-        moves = 0;
-        solution.enqueue(current);
-        while (!current.isGoal()) {
-            for (Board b : current.neighbors()) {
-                if (!b.equals(previous))
-                    priorityQueue.insert(new PriorityBoard(b, moves));
+        lastNode = new PriorityBoard(initial, 0, null);
+        PriorityBoard twinLastNode = new PriorityBoard(initial.twin(), 0, null);
+
+        while (!lastNode.board.isGoal() && !twinLastNode.board.isGoal()) {
+            for (Board b : lastNode.board.neighbors()) {
+                if (lastNode.previous == null || !b.equals(lastNode.previous.board)) {
+                    priorityQueue.insert(new PriorityBoard(b, lastNode.moves+1, lastNode));
+                }
             }
-            moves++;
-            previous = current;
-            if (priorityQueue.isEmpty())
-                break;
-            current = priorityQueue.delMin().board;
-            solution.enqueue(current);
-            if (current.equals(initial)) {
-                solution = null;
-                break;
+
+            for (Board b : twinLastNode.board.neighbors()) {
+                if (twinLastNode.previous == null || !b.equals(twinLastNode.previous.board)) {
+                    twinQueue.insert(new PriorityBoard(b, twinLastNode.moves+1, lastNode));
+                }
             }
+            
+            lastNode = priorityQueue.delMin();
+            twinLastNode = twinQueue.delMin();
         }
 
-        isSolvable = current.isGoal();
+        if (lastNode.board.isGoal()) {
+            isSolvable = true;
+        }
+
+        if (twinLastNode.board.isGoal()) {
+            isSolvable = false;
+            lastNode = null;
+        }
     }
 
     public boolean isSolvable() {
@@ -70,11 +88,21 @@ public class Solver {
     }
 
     public int moves() {
-        return moves;
+        if (lastNode == null)
+            return -1;
+        return lastNode.moves;
     }
 
     public Iterable<Board> solution() {
-        return solution;
+        if (lastNode == null)
+            return null;
+        Stack<Board> stack = new Stack<Board>();
+        PriorityBoard last = lastNode;
+        while (last != null) {
+            stack.push(last.board);
+            last = last.previous;
+        }
+        return stack;
     }
 
     public static void main(String[] args) {
