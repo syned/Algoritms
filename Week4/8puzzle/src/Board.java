@@ -14,7 +14,10 @@ public class Board {
     private int hamming;
     private int manhattan;
     private boolean isGoal = true;
-    private MinPQ<Board> queue;
+    private Queue<Board> queue;
+
+    private int emptyCellRow = 0;
+    private int emptyCellCol = 0;
     
     private int rightPlace(int i, int j) {
         return i*N + j + 1;
@@ -56,10 +59,7 @@ public class Board {
     public Board(int[][] blocks) {
         N = blocks.length;
 
-        queue = new MinPQ<Board>(N, GetComparator());
-        
-        int emptyCellRow = 0;
-        int emptyCellCol = 0;
+        queue = new Queue<Board>();
         
         this.blocks = new int[N][N];        
         for (int i = 0; i < N; i++)
@@ -76,33 +76,6 @@ public class Board {
                     emptyCellRow = i;
                 }
             }
-        
-        if (isGoal)
-            return;
-                
-        if (emptyCellRow != 0) {
-            swap(emptyCellRow, emptyCellCol, emptyCellRow-1, emptyCellCol);            
-            queue.insert(new Board(this.blocks));
-            swap(emptyCellRow - 1, emptyCellCol, emptyCellRow, emptyCellCol);                      
-        }
-        
-        if (emptyCellRow != N-1) {
-            swap(emptyCellRow, emptyCellCol, emptyCellRow+1, emptyCellCol);
-            queue.insert(new Board(this.blocks));
-            swap(emptyCellRow + 1, emptyCellCol, emptyCellRow, emptyCellCol);
-        }
-        
-        if (emptyCellCol != 0) {
-            swap(emptyCellRow, emptyCellCol, emptyCellRow, emptyCellCol-1);
-            queue.insert(new Board(this.blocks));
-            swap(emptyCellRow, emptyCellCol-1, emptyCellRow, emptyCellCol);
-        }
-
-        if (emptyCellCol != N-1) {
-            swap(emptyCellRow, emptyCellCol, emptyCellRow, emptyCellCol+1);
-            queue.insert(new Board(this.blocks));
-            swap(emptyCellRow, emptyCellCol+1, emptyCellRow, emptyCellCol);
-        }
     }
 
     public int dimension() {
@@ -139,13 +112,32 @@ public class Board {
         return true;
     }
 
-    public Iterable<Board> neighbours() {
-        return new Iterable<Board>() {
-            @Override
-            public Iterator<Board> iterator() {
-                return queue.iterator();
-            }
-        };
+    public Iterable<Board> neighbors() {
+        if (emptyCellRow != 0) {
+            swap(emptyCellRow, emptyCellCol, emptyCellRow-1, emptyCellCol);
+            queue.enqueue(new Board(this.blocks));
+            swap(emptyCellRow - 1, emptyCellCol, emptyCellRow, emptyCellCol);
+        }
+
+        if (emptyCellRow != N-1) {
+            swap(emptyCellRow, emptyCellCol, emptyCellRow+1, emptyCellCol);
+            queue.enqueue(new Board(this.blocks));
+            swap(emptyCellRow + 1, emptyCellCol, emptyCellRow, emptyCellCol);
+        }
+
+        if (emptyCellCol != 0) {
+            swap(emptyCellRow, emptyCellCol, emptyCellRow, emptyCellCol-1);
+            queue.enqueue(new Board(this.blocks));
+            swap(emptyCellRow, emptyCellCol-1, emptyCellRow, emptyCellCol);
+        }
+
+        if (emptyCellCol != N-1) {
+            swap(emptyCellRow, emptyCellCol, emptyCellRow, emptyCellCol+1);
+            queue.enqueue(new Board(this.blocks));
+            swap(emptyCellRow, emptyCellCol+1, emptyCellRow, emptyCellCol);
+        }
+
+        return queue;
     }
 
     public String toString() {
