@@ -43,10 +43,10 @@ public class PointSET {
         Point2D nearest = null;
         double minDistance = Double.MAX_VALUE;
         for (Point2D point : bst) {
-            double currentDistance = point.distanceTo(p);
+            double currentDistance = point.distanceSquaredTo(p);
             if (currentDistance < minDistance) {
                 minDistance = currentDistance;
-                nearest = p;
+                nearest = point;
             }
         }
 
